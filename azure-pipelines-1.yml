@@ -1,34 +1,66 @@
-# ASP.NET Core (.NET Framework)
-# Build and test ASP.NET Core projects targeting the full .NET Framework.
-# Add steps that publish symbols, save build artifacts, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
-
 trigger:
 - main
 
 pool:
   vmImage: 'windows-latest'
 
-variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
+jobs:
+- job: Deploy
+  displayName: 'Deploy Azure Function'
+  steps:
 
-steps:
-- task: NuGetToolInstaller@1
+  - task: UseDotNet@2
+    inputs:
+      packageType: 'sdk'
+      version: '3.x.x'
+      installationPath: $(Agent.ToolsDirectory)/dotnet
 
-- task: NuGetCommand@2
-  inputs:
-    restoreSolution: '$(solution)'
+  - task: DotNetCoreCLI@2
+    displayName: 'Restore'
+    inputs:
+      command: 'restore'
+      projects: '**/*.csproj'
 
-- task: VSBuild@1
-  inputs:
-    solution: '$(solution)'
-    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+  - task: DotNetCoreCLI@2
+    displayName: 'Build'
+    inputs:
+      command: 'build'
+      projects: '**/*.csproj'
+      arguments: '--configuration Release'
 
-- task: VSTest@2
-  inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+  - task: DotNetCoreCLI@2
+    displayName: 'Publish'
+    inputs:
+      command: 'publish'
+      publishWebProjects: true
+      arguments: '--configuration Release --output $(build.artifactstagingdirectory)/output'
+      zipAfterPublish: true
+
+  - task: AzureRmWebAppDeployment@4
+    displayName: 'Deploy to Azure Functions'
+    inputs:
+      ConnectionType: 'AzureRM'
+      azureSubscription: 'YourAzureSubscription'
+      appType: 'functionApp'
+      WebAppName: 'YourAzureFunctionAppName'
+      packageForLinux: '$(build.artifactstagingdirectory)/output/*.zip'
+
+  - task: AzureCLI@2
+    displayName: 'Configure Application Settings'
+    inputs:
+      azureSubscription: 'YourAzureSubscription'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az functionapp config appsettings set --name YourAzureFunctionAppName --resource-group YourResourceGroupName --settings MySetting1=Value1 MySetting2=Value2
+
+  - task: AzureCLI@2
+    displayName: 'Configure Service Bus Connection String'
+    inputs:
+      azureSubscription: 'YourAzureSubscription'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az functionapp config appsettings set --name YourAzureFunctionAppName --resource-group YourResourceGroupName --settings ServiceBusConnectionString="YourServiceBusConnectionString"
+
+# Additional tasks or steps can be added as needed.

@@ -5,7 +5,7 @@
 steps:
     - task: DotNetCoreCLI@2
       displayName: 'Publish SalesOrder'
-      condition: and(succeeded() , eq(variables['BuildSalesOrder'], 'true'))
+
       inputs:
         command: 'publish'
         publishWebProjects: false
@@ -14,7 +14,7 @@ steps:
         arguments: '--configuration Release --output publish_output_SalesOrder'
         projects: '$(System.DefaultWorkingDirectory)/ServiceBusIntegration/ServiceBusIntegration/ServiceBusTrigger.csproj'
     - task: ArchiveFiles@2
-      condition: and(succeeded() , eq(variables['BuildSalesOrder'], 'true'))
+
       displayName: "Archive SalesOrder"
       inputs:
         rootFolderOrFile: "$(System.DefaultWorkingDirectory)/publish_output_SalesOrder"
@@ -22,7 +22,6 @@ steps:
         archiveFile: "$(System.DefaultWorkingDirectory)/build$(Build.BuildId)SalesOrder.zip"
     - task: PublishBuildArtifacts@1
       displayName: SalesOrder
-      condition: and(succeeded() , eq(variables['BuildSalesOrder'], 'true'))
       inputs:
         PathtoPublish: '$(System.DefaultWorkingDirectory)/build$(Build.BuildId)SalesOrder.zip'
         artifactName: 'drop_salesOrder'

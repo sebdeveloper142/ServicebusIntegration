@@ -40,7 +40,7 @@ jobs:
     displayName: 'Deploy to Azure Functions'
     inputs:
       ConnectionType: 'AzureRM'
-      azureSubscription: 'YourAzureSubscription'
+      azureSubscription: 'Enterprise Integration'
       appType: 'functionApp'
       WebAppName: 'YourAzureFunctionAppName'
       packageForLinux: '$(build.artifactstagingdirectory)/output/*.zip'
@@ -48,7 +48,7 @@ jobs:
   - task: AzureCLI@2
     displayName: 'Configure Application Settings'
     inputs:
-      azureSubscription: 'YourAzureSubscription'
+      azureSubscription: 'Enterprise Integration'
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
@@ -57,7 +57,7 @@ jobs:
   - task: AzureCLI@2
     displayName: 'Configure Service Bus Connection String'
     inputs:
-      azureSubscription: 'YourAzureSubscription'
+      azureSubscription: 'Enterprise Integration'
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |

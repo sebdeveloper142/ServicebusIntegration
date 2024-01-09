@@ -1,6 +1,5 @@
 using System.Text;
 using System.Text.Json;
-
 using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;

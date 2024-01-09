@@ -21,7 +21,8 @@ namespace ServiceBusIntegration
         }
 
         [Function(nameof(ServicebusExample))]
-        public async Task Run([ServiceBusTrigger("orders", Connection = "ServiceBusConnection")] ServiceBusReceivedMessage message, CancellationToken cancellationToken)
+
+        public async Task Run([ServiceBusTrigger("orders", Connection = "ConnectionString")] ServiceBusReceivedMessage message, CancellationToken cancellationToken)
         {
            // _logger.LogInformation("Message ID: {id}", message.MessageId);
             //_logger.LogInformation("Message Body: {body}", message.Body);
